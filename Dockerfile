@@ -37,14 +37,14 @@ RUN adduser homestead; \
 
 # PHP installation
 RUN apt install --allow-downgrades --allow-remove-essential --allow-change-held-packages -y \
-  php-pear php-xdebug php7.2-bcmath php7.2-cli php7.2-curl php7.2-dev \
-  php7.2-gd php7.2-imap php7.2-intl php7.2-ldap php7.2-mbstring php7.2-memcached \
-  php7.2-mysql php7.2-pgsql php7.2-readline php7.2-soap php7.2-sqlite3 php7.2-xml \
-  php7.2-zip
+  php-pear php-xdebug php7.3-bcmath php7.3-cli php7.3-curl php7.3-dev \
+  php7.3-gd php7.3-imap php7.3-intl php7.3-ldap php7.3-mbstring php7.3-memcached \
+  php7.3-mysql php7.3-pgsql php7.3-readline php7.3-soap php7.3-sqlite3 php7.3-xml \
+  php7.3-zip
 
-RUN update-alternatives --set php /usr/bin/php7.2; \
-  update-alternatives --set php-config /usr/bin/php-config7.2; \
-  update-alternatives --set phpize /usr/bin/phpize7.2
+RUN update-alternatives --set php /usr/bin/php7.3; \
+  update-alternatives --set php-config /usr/bin/php-config7.3; \
+  update-alternatives --set phpize /usr/bin/phpize7.3
 
 # Install Composer
 RUN curl -sS https://getcomposer.org/installer | php; \
@@ -53,38 +53,38 @@ RUN printf "\nPATH=\"/home/homestead/.composer/vendor/bin:\$PATH\"\n" | tee -a /
 
 # PHP configuration
 # Customize PHP CLI configuration
-RUN sed -i "s/error_reporting = .*/error_reporting = E_ALL/" /etc/php/7.2/cli/php.ini; \
-  sed -i "s/display_errors = .*/display_errors = On/" /etc/php/7.2/cli/php.ini; \
-  sed -i "s/memory_limit = .*/memory_limit = 512M/" /etc/php/7.2/cli/php.ini; \
-  sed -i "s/;date.timezone.*/date.timezone = UTC/" /etc/php/7.2/cli/php.ini
+RUN sed -i "s/error_reporting = .*/error_reporting = E_ALL/" /etc/php/7.3/cli/php.ini; \
+  sed -i "s/display_errors = .*/display_errors = On/" /etc/php/7.3/cli/php.ini; \
+  sed -i "s/memory_limit = .*/memory_limit = 512M/" /etc/php/7.3/cli/php.ini; \
+  sed -i "s/;date.timezone.*/date.timezone = UTC/" /etc/php/7.3/cli/php.ini
 
 # Install Nginx & PHP-FPM
 RUN apt-get install -y --allow-downgrades --allow-remove-essential --allow-change-held-packages \
-  nginx php7.2-fpm
+  nginx php7.3-fpm
 
 RUN rm /etc/nginx/sites-enabled/default; \
   rm /etc/nginx/sites-available/default
 
 # Customize PHP-FPM configuration
-RUN echo "xdebug.remote_enable = 1" >> /etc/php/7.2/mods-available/xdebug.ini; \
-  echo "xdebug.remote_connect_back = 1" >> /etc/php/7.2/mods-available/xdebug.ini; \
-  echo "xdebug.remote_port = 9000" >> /etc/php/7.2/mods-available/xdebug.ini; \
-  echo "xdebug.max_nesting_level = 512" >> /etc/php/7.2/mods-available/xdebug.ini; \
-  echo "opcache.revalidate_freq = 0" >> /etc/php/7.2/mods-available/opcache.ini
+RUN echo "xdebug.remote_enable = 1" >> /etc/php/7.3/mods-available/xdebug.ini; \
+  echo "xdebug.remote_connect_back = 1" >> /etc/php/7.3/mods-available/xdebug.ini; \
+  echo "xdebug.remote_port = 9000" >> /etc/php/7.3/mods-available/xdebug.ini; \
+  echo "xdebug.max_nesting_level = 512" >> /etc/php/7.3/mods-available/xdebug.ini; \
+  echo "opcache.revalidate_freq = 0" >> /etc/php/7.3/mods-available/opcache.ini
 
-RUN sed -i "s/error_reporting = .*/error_reporting = E_ALL/" /etc/php/7.2/fpm/php.ini; \
-  sed -i "s/display_errors = .*/display_errors = On/" /etc/php/7.2/fpm/php.ini; \
-  sed -i "s/;cgi.fix_pathinfo=1/cgi.fix_pathinfo=0/" /etc/php/7.2/fpm/php.ini; \
-  sed -i "s/memory_limit = .*/memory_limit = 512M/" /etc/php/7.2/fpm/php.ini; \
-  sed -i "s/upload_max_filesize = .*/upload_max_filesize = 100M/" /etc/php/7.2/fpm/php.ini; \
-  sed -i "s/post_max_size = .*/post_max_size = 100M/" /etc/php/7.2/fpm/php.ini; \
-  sed -i "s/;date.timezone.*/date.timezone = UTC/" /etc/php/7.2/fpm/php.ini
+RUN sed -i "s/error_reporting = .*/error_reporting = E_ALL/" /etc/php/7.3/fpm/php.ini; \
+  sed -i "s/display_errors = .*/display_errors = On/" /etc/php/7.3/fpm/php.ini; \
+  sed -i "s/;cgi.fix_pathinfo=1/cgi.fix_pathinfo=0/" /etc/php/7.3/fpm/php.ini; \
+  sed -i "s/memory_limit = .*/memory_limit = 512M/" /etc/php/7.3/fpm/php.ini; \
+  sed -i "s/upload_max_filesize = .*/upload_max_filesize = 100M/" /etc/php/7.3/fpm/php.ini; \
+  sed -i "s/post_max_size = .*/post_max_size = 100M/" /etc/php/7.3/fpm/php.ini; \
+  sed -i "s/;date.timezone.*/date.timezone = UTC/" /etc/php/7.3/fpm/php.ini
 
-RUN printf "[openssl]\n" | tee -a /etc/php/7.2/fpm/php.ini; \
-  printf "openssl.cainfo = /etc/ssl/certs/ca-certificates.crt\n" | tee -a /etc/php/7.2/fpm/php.ini
+RUN printf "[openssl]\n" | tee -a /etc/php/7.3/fpm/php.ini; \
+  printf "openssl.cainfo = /etc/ssl/certs/ca-certificates.crt\n" | tee -a /etc/php/7.3/fpm/php.ini
 
-RUN printf "[curl]\n" | tee -a /etc/php/7.2/fpm/php.ini; \
-  printf "curl.cainfo = /etc/ssl/certs/ca-certificates.crt\n" | tee -a /etc/php/7.2/fpm/php.ini
+RUN printf "[curl]\n" | tee -a /etc/php/7.3/fpm/php.ini; \
+  printf "curl.cainfo = /etc/ssl/certs/ca-certificates.crt\n" | tee -a /etc/php/7.3/fpm/php.ini
 
 # Disable XDebug on the CLI
 RUN phpdismod -s cli xdebug
@@ -92,8 +92,8 @@ RUN phpdismod -s cli xdebug
 # Customize Nginx & PHP-FPM to configured user
 RUN sed -i "s/user www-data;/user homestead;/" /etc/nginx/nginx.conf; \
   sed -i "s/# server_names_hash_bucket_size.*/server_names_hash_bucket_size 64;/" /etc/nginx/nginx.conf; \
-  sed -i "s/user = www-data/user = homestead/" /etc/php/7.2/fpm/pool.d/www.conf; \
-  sed -i "s/group = www-data/group = homestead/" /etc/php/7.2/fpm/pool.d/www.conf
+  sed -i "s/user = www-data/user = homestead/" /etc/php/7.3/fpm/pool.d/www.conf; \
+  sed -i "s/group = www-data/group = homestead/" /etc/php/7.3/fpm/pool.d/www.conf
 
 # Add homestead user to required groups
 RUN usermod -aG sudo homestead; usermod -aG www-data homestead
