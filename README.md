@@ -38,7 +38,7 @@ There are two ways to accomplish this, by using the dockerfile with plain docker
 ```bash
 projectDir=/path/to/my/project/
 
-docker container run --rm --name myLEPContainerTest --volume ${projectDir}:/app "{--port 8000:80 ${imageName}:${label} supervisord
+docker container run --rm --name myLEPContainerTest --volume ${projectDir}:/app --port 8000:80 ${imageName}:${label} supervisord
 
 # Note: Supervisor is the service configured in the image to maintain nginx and php-fpm as entrypoints.
 ```
@@ -81,4 +81,4 @@ cd /; ./serve.sh ${myAppDomain} /app/${publicDir}
 
 ## Additional Notes
 
-- Thanks to @shincoder for creating (homestead-docker)[https://github.com/shincoder/homestead-docker] and that being the basis of what's configure here.
+- Thanks to @shincoder for creating [homestead-docker](https://github.com/shincoder/homestead-docker) and that being the basis of what's defined here.

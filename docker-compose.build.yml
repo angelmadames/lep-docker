@@ -9,7 +9,6 @@ services:
     container_name: myApp
     build: ./
     image: lep:php7.2
-    user: homestead
     working_dir: /app
     restart: always
     ports:
@@ -20,7 +19,7 @@ services:
       - ./apps/nginx/sites-available:/etc/nginx/sites-available
       - ./apps/nginx/sites-enabled:/etc/nginx/sites-enabled
     command: >
-      ["/usr/bin/supervisord"]
+      /usr/bin/supervisord
     networks:
       app_network:
         aliases:

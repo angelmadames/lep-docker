@@ -126,8 +126,9 @@ RUN apt autoremove -y; \
   apt clean -y
 
 # Ensuring permissions are OK
+RUN mkdir -p /run/php
 RUN chown -R homestead:homestead /home/homestead
 
 EXPOSE 80 443 22
 
-CMD ["/usr/bin/supervisord"]
+CMD [ "/usr/bin/supervisord" ]
