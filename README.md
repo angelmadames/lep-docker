@@ -19,7 +19,7 @@ To build this image it is only necessary to run the docker build command against
 
 ```bash
 imageName=lep
-label=php7.2
+label=php7.1
 
 docker build -t ${imageName}:${label} .
 ```
