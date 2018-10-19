@@ -1,0 +1,62 @@
+# Example docker-compose file
+# Can be used with the built Dockerfile
+# Refer to the `.env` file for default variables.
+version: '3.6'
+
+services:
+  ## APP WEB ##
+  app_web:
+    container_name: myApp
+    build: ./
+    image: lep:php7.2
+    user: homestead
+    working_dir: /app
+    restart: always
+    ports:
+      - "8000:80"
+      - "2222:22"
+    volumes:
+      - ${APP_DIR}:/app
+      - ./apps/nginx/sites-available:/etc/nginx/sites-available
+      - ./apps/nginx/sites-enabled:/etc/nginx/sites-enabled
+    command: >
+      ["/usr/bin/supervisord"]
+    networks:
+      app_network:
+        aliases:
+          - web
+    
+  ## APP DB ##
+  app_db:
+    container_name: myAppDB
+    image: postgres:11
+    restart: always
+    environment:
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: ${DB_NAME}
+    ports:
+      - "${DB_LOCAL_PORT}:5432"
+    volumes:
+      - myAppData:/var/lib/postgresql/data
+    networks:
+      app_network:
+        aliases:
+          - db
+
+  ## ADMINER ##
+  app_adminer:
+    container_name: myAdminer
+    image: adminer:4.6.3
+    ports:
+      - "8080:8080"
+    networks:
+      app_network:
+        aliases:
+          - adm
+
+volumes:
+  myAppData:
+
+networks:
+  app_network:

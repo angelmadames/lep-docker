@@ -1,0 +1,7 @@
+docker-compose.yml
+*.log
+apps/
+projects/
+services/
+*.error
+*.debug
