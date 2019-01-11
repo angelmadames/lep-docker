@@ -1,16 +1,26 @@
 FROM ubuntu:18.04
 
-LABEL maintainer="Angel M. Adames <angelmadames@gmail.com"
+# Maintainer
+LABEL maintainer="Angel Adames <a.adames@gbh.com.do>"
 
+# Environment
 ENV DEBIAN_FRONTEND noninteractive
+
+ENV PHP_VERSION 7.2
+
 ENV NVM_DIR /usr/local/bin/nvm
-ENV NODE_VERSION 10.11.0
+ENV NVM_VERSION 0.33.11
+
+ENV NODE_VERSION 10.15.0
 
 # Update package list and upgrade available packages
 RUN apt update; apt upgrade -y
 
 # Add PPAs and repositories
-RUN apt install -y software-properties-common ca-certificates curl; \
+RUN apt install -y \
+  software-properties-common \
+  ca-certificates \
+  curl; \
   apt-add-repository ppa:nginx/stable -y; \
   apt-add-repository ppa:ondrej/php -y; \
   curl -sS https://dl.yarnpkg.com/debian/pubkey.gpg | apt-key add -; \
@@ -20,10 +30,23 @@ RUN apt install -y software-properties-common ca-certificates curl; \
 RUN apt update
 
 # Update package lists & install some basic packages
-RUN apt install --fix-missing -y apt-utils bash-completion build-essential cifs-utils curl \
-    dos2unix gcc git git-flow graphviz libmcrypt4 libnotify-bin libpcre3-dev \
-    libpng-dev mcrypt nano ntp pv python-pip python2.7-dev re2c \
-    software-properties-common supervisor unzip vim whois zip zsh yarn
+RUN apt install -y \
+  --fix-missing -y \
+  apt-utils \
+  bash-completion \
+  build-essential \
+  dos2unix \
+  gcc \
+  git \
+  libmcrypt4 \
+  libpcre3-dev \
+  libpng-dev \
+  mcrypt \
+  nano \
+  supervisor \
+  vim \
+  yarn \
+  zsh
 
 # Configure locale
 RUN echo "LC_ALL=en_US.UTF-8" >> /etc/default/locale
@@ -36,15 +59,33 @@ RUN adduser homestead; \
   usermod -p $(echo secret | openssl passwd -1 -stdin) homestead
 
 # PHP installation
-RUN apt install --allow-downgrades --allow-remove-essential --allow-change-held-packages -y \
-  php-pear php-xdebug php7.2-bcmath php7.2-cli php7.2-curl php7.2-dev \
-  php7.2-gd php7.2-imap php7.2-intl php7.2-ldap php7.2-mbstring php7.2-memcached \
-  php7.2-mysql php7.2-pgsql php7.2-readline php7.2-soap php7.2-sqlite3 php7.2-xml \
-  php7.2-zip
+RUN apt install -y \
+  --allow-downgrades \
+  --allow-remove-essential \
+  --allow-change-held-packages \
+  php-pear \
+  php-xdebug \
+  php${PHP_VERSION}-bcmath \
+  php${PHP_VERSION}-cli \
+  php${PHP_VERSION}-curl \
+  php${PHP_VERSION}-dev \
+  php${PHP_VERSION}-gd \
+  php${PHP_VERSION}-imap \
+  php${PHP_VERSION}-intl \
+  php${PHP_VERSION}-ldap \
+  php${PHP_VERSION}-mbstring \
+  php${PHP_VERSION}-memcached \
+  php${PHP_VERSION}-mysql \
+  php${PHP_VERSION}-pgsql \
+  php${PHP_VERSION}-readline \
+  php${PHP_VERSION}-soap \
+  php${PHP_VERSION}-sqlite3 \
+  php${PHP_VERSION}-xml \
+  php${PHP_VERSION}-zip
 
-RUN update-alternatives --set php /usr/bin/php7.2; \
-  update-alternatives --set php-config /usr/bin/php-config7.2; \
-  update-alternatives --set phpize /usr/bin/phpize7.2
+RUN update-alternatives --set php /usr/bin/php${PHP_VERSION}; \
+  update-alternatives --set php-config /usr/bin/php-config${PHP_VERSION}; \
+  update-alternatives --set phpize /usr/bin/phpize${PHP_VERSION}
 
 # Install Composer
 RUN curl -sS https://getcomposer.org/installer | php; \
@@ -53,38 +94,42 @@ RUN printf "\nPATH=\"/home/homestead/.composer/vendor/bin:\$PATH\"\n" | tee -a /
 
 # PHP configuration
 # Customize PHP CLI configuration
-RUN sed -i "s/error_reporting = .*/error_reporting = E_ALL/" /etc/php/7.2/cli/php.ini; \
-  sed -i "s/display_errors = .*/display_errors = On/" /etc/php/7.2/cli/php.ini; \
-  sed -i "s/memory_limit = .*/memory_limit = 512M/" /etc/php/7.2/cli/php.ini; \
-  sed -i "s/;date.timezone.*/date.timezone = UTC/" /etc/php/7.2/cli/php.ini
+RUN sed -i "s/error_reporting = .*/error_reporting = E_ALL/" /etc/php/${PHP_VERSION}/cli/php.ini; \
+  sed -i "s/display_errors = .*/display_errors = On/" /etc/php/${PHP_VERSION}/cli/php.ini; \
+  sed -i "s/memory_limit = .*/memory_limit = 512M/" /etc/php/${PHP_VERSION}/cli/php.ini; \
+  sed -i "s/;date.timezone.*/date.timezone = UTC/" /etc/php/${PHP_VERSION}/cli/php.ini
 
 # Install Nginx & PHP-FPM
-RUN apt-get install -y --allow-downgrades --allow-remove-essential --allow-change-held-packages \
-  nginx php7.2-fpm
+RUN apt-get install -y \
+  --allow-change-held-packages \
+  --allow-downgrades \
+  --allow-remove-essential \
+  nginx \
+  php${PHP_VERSION}-fpm
 
 RUN rm /etc/nginx/sites-enabled/default; \
   rm /etc/nginx/sites-available/default
 
 # Customize PHP-FPM configuration
-RUN echo "xdebug.remote_enable = 1" >> /etc/php/7.2/mods-available/xdebug.ini; \
-  echo "xdebug.remote_connect_back = 1" >> /etc/php/7.2/mods-available/xdebug.ini; \
-  echo "xdebug.remote_port = 9000" >> /etc/php/7.2/mods-available/xdebug.ini; \
-  echo "xdebug.max_nesting_level = 512" >> /etc/php/7.2/mods-available/xdebug.ini; \
-  echo "opcache.revalidate_freq = 0" >> /etc/php/7.2/mods-available/opcache.ini
+RUN echo "xdebug.remote_enable = 1" >> /etc/php/${PHP_VERSION}/mods-available/xdebug.ini; \
+  echo "xdebug.remote_connect_back = 1" >> /etc/php/${PHP_VERSION}/mods-available/xdebug.ini; \
+  echo "xdebug.remote_port = 9000" >> /etc/php/${PHP_VERSION}/mods-available/xdebug.ini; \
+  echo "xdebug.max_nesting_level = 512" >> /etc/php/${PHP_VERSION}/mods-available/xdebug.ini; \
+  echo "opcache.revalidate_freq = 0" >> /etc/php/${PHP_VERSION}/mods-available/opcache.ini
 
-RUN sed -i "s/error_reporting = .*/error_reporting = E_ALL/" /etc/php/7.2/fpm/php.ini; \
-  sed -i "s/display_errors = .*/display_errors = On/" /etc/php/7.2/fpm/php.ini; \
-  sed -i "s/;cgi.fix_pathinfo=1/cgi.fix_pathinfo=0/" /etc/php/7.2/fpm/php.ini; \
-  sed -i "s/memory_limit = .*/memory_limit = 512M/" /etc/php/7.2/fpm/php.ini; \
-  sed -i "s/upload_max_filesize = .*/upload_max_filesize = 100M/" /etc/php/7.2/fpm/php.ini; \
-  sed -i "s/post_max_size = .*/post_max_size = 100M/" /etc/php/7.2/fpm/php.ini; \
-  sed -i "s/;date.timezone.*/date.timezone = UTC/" /etc/php/7.2/fpm/php.ini
+RUN sed -i "s/error_reporting = .*/error_reporting = E_ALL/" /etc/php/${PHP_VERSION}/fpm/php.ini; \
+  sed -i "s/display_errors = .*/display_errors = On/" /etc/php/${PHP_VERSION}/fpm/php.ini; \
+  sed -i "s/;cgi.fix_pathinfo=1/cgi.fix_pathinfo=0/" /etc/php/${PHP_VERSION}/fpm/php.ini; \
+  sed -i "s/memory_limit = .*/memory_limit = 512M/" /etc/php/${PHP_VERSION}/fpm/php.ini; \
+  sed -i "s/upload_max_filesize = .*/upload_max_filesize = 100M/" /etc/php/${PHP_VERSION}/fpm/php.ini; \
+  sed -i "s/post_max_size = .*/post_max_size = 100M/" /etc/php/${PHP_VERSION}/fpm/php.ini; \
+  sed -i "s/;date.timezone.*/date.timezone = UTC/" /etc/php/${PHP_VERSION}/fpm/php.ini
 
-RUN printf "[openssl]\n" | tee -a /etc/php/7.2/fpm/php.ini; \
-  printf "openssl.cainfo = /etc/ssl/certs/ca-certificates.crt\n" | tee -a /etc/php/7.2/fpm/php.ini
+RUN printf "[openssl]\n" | tee -a /etc/php/${PHP_VERSION}/fpm/php.ini; \
+  printf "openssl.cainfo = /etc/ssl/certs/ca-certificates.crt\n" | tee -a /etc/php/${PHP_VERSION}/fpm/php.ini
 
-RUN printf "[curl]\n" | tee -a /etc/php/7.2/fpm/php.ini; \
-  printf "curl.cainfo = /etc/ssl/certs/ca-certificates.crt\n" | tee -a /etc/php/7.2/fpm/php.ini
+RUN printf "[curl]\n" | tee -a /etc/php/${PHP_VERSION}/fpm/php.ini; \
+  printf "curl.cainfo = /etc/ssl/certs/ca-certificates.crt\n" | tee -a /etc/php/${PHP_VERSION}/fpm/php.ini
 
 # Disable XDebug on the CLI
 RUN phpdismod -s cli xdebug
@@ -92,21 +137,24 @@ RUN phpdismod -s cli xdebug
 # Customize Nginx & PHP-FPM to configured user
 RUN sed -i "s/user www-data;/user homestead;/" /etc/nginx/nginx.conf; \
   sed -i "s/# server_names_hash_bucket_size.*/server_names_hash_bucket_size 64;/" /etc/nginx/nginx.conf; \
-  sed -i "s/user = www-data/user = homestead/" /etc/php/7.2/fpm/pool.d/www.conf; \
-  sed -i "s/group = www-data/group = homestead/" /etc/php/7.2/fpm/pool.d/www.conf
+  sed -i "s/user = www-data/user = homestead/" /etc/php/${PHP_VERSION}/fpm/pool.d/www.conf; \
+  sed -i "s/group = www-data/group = homestead/" /etc/php/${PHP_VERSION}/fpm/pool.d/www.conf
 
 # Add homestead user to required groups
 RUN usermod -aG sudo homestead; usermod -aG www-data homestead
 
 # Installing Node related packages using NVM
-RUN mkdir -p $NVM_DIR; curl -o- https://raw.githubusercontent.com/creationix/nvm/v0.33.11/install.sh | bash
+RUN mkdir -p $NVM_DIR; curl -o- https://raw.githubusercontent.com/creationix/nvm/v${NVM_VERSION}/install.sh | bash
 RUN . $NVM_DIR/nvm.sh; \
   nvm install $NODE_VERSION; \
   nvm alias default $NODE_VERSION; \
   nvm use default
 
 # Install additional utilities
-RUN apt install -y chromium-browser xvfb imagemagick x11-apps
+RUN apt install -y \
+  xvfb \
+  imagemagick \
+  x11-apps
 
 # Install wp-cli
 RUN curl -O https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar; \
@@ -117,9 +165,6 @@ RUN curl -O https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli
 COPY serve.sh /serve.sh
 COPY nginx.default.conf /etc/nginx/sites-enabled/default.conf
 COPY supervisor.conf /etc/supervisor/conf.d/supervisor.conf
-
-# One last upgrade check
-RUN apt update; apt upgrade -y
 
 # Clean up
 RUN apt autoremove -y; \
