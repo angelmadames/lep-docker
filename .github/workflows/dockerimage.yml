@@ -10,5 +10,7 @@ jobs:
 
     steps:
     - uses: actions/checkout@v1
+    - name: Cache
+      uses: actions/cache@v1.0.0
     - name: Build the Docker image
-      run: docker build . --file Dockerfile angelmadames/lep:$(date +%s)
+      run: docker build . --file Dockerfile lep-docker:$(date +%s)
